@@ -1,0 +1,110 @@
+---
+title: "Assignment 1"
+author: "Minh Chung Ngo"
+format: 
+    html:
+        toc: true
+    pdf:
+        toc: true
+---
+
+# Load libraries (not display any R code, messages, or warnings)
+```{r setup, include=FALSE}
+#| echo = FALSE
+#| message = FALSE
+#| warning = FALSE
+library(tidyverse)
+library(ggplot2)
+```
+
+# Load the data
+```{r load-data}
+#| echo = FALSE
+#| message = FALSE
+#| warning = FALSE
+data <- read_csv("data/34667830_Minh Ngo.csv")
+```
+
+# Data exploration
+```{r data-exploration}
+data |> head()
+data |> glimpse()
+data |> summary()
+```
+
+# Introduction section
+In this assignment, we will analyze the dataset containing information about the relationship between marketing expenditure and the number of visits, amount purchases of customers. The dataset includes variables such as `signup_date`, `marketing_spend`, `visits`, and `amount_purchases`. We will explore the data to understand the distribution of these variables and their relationships.
+
+# Research Question section
+The main research questions we aim to answer are:
+1. What is the relationship between marketing expenditure and the number of visits?
+2. What is the relationship between marketing expenditure and the amount of purchases?
+3. How do the number of visits and the amount of purchases relate to each other?
+
+# Dataset introduction
+Dataset was collected from 150 observations, including the following variables:
+- `customer_id`: Unique identifier for each customer
+- `signup_date`: The date when the customer signed up
+- `marketing_spend`: The amount of money spent on marketing for each customer
+- `visits`: The number of visits made by each customer
+- `amount_purchases`: The total amount of purchases made by each customer
+- `segment`: The customer segment (e.g. "Consumer", "SMB") to which each customer belongs
+- `notes`: Additional notes about each customer (e.g. "contacted", "returned")
+
+# Dataset Description subsection
+Number of rows and columns
+```{r dataset-description}
+size <- nrow(data)
+column <- ncol(data)
+dataset_description <- data.frame(
+  size = size,
+  columns = column
+)
+dataset_description
+```
+
+Variables types
+```{r variable-types}
+data.frame(type = sapply(data, class))
+```
+
+Summary statistics (table and plots)
+```{r summary-table}
+# Count NA values
+na_count <- sapply(data, function(x) sum(is.na(x)))
+data.frame(na_count)
+# Summary table
+summary_table <- data |> summary()
+
+summary_table
+```
+
+Based on the summary statistics, dataset has some missing values. Ignoring them, we have the average marketing expenditure is around $142.61, with a wide range of values from $1.97 to $298.31. The average number of visits is approximately 5, while the average amount of purchases is around $120.
+
+```{r summary-plots}
+summary_plots <- data |> select(marketing_spend) |> na.omit() |> hist(marketing_spend, main = "Distribution of Marketing Spend", xlab = "Marketing Spend")
+```
+
+# Results section
+
+```{r summary-plots}
+# Summary plot
+mar_pur_plot <- data |>
+  ggplot(aes(x = marketing_spend, y = purchase_amount)) +
+  geom_point() +
+  labs(title = "Marketing Spend vs Amount Purchases",
+       x = "Marketing Spend",
+       y = "Amount Purchases") 
+
+mar_vis_plot <- data |>
+  ggplot(aes(x = marketing_spend, y = visits)) +
+  geom_point() +
+  labs(title = "Marketing Spend vs Visits",
+       x = "Marketing Spend",
+       y = "Visits") 
+
+mar_pur_plot
+mar_vis_plot
+```
+
+From the scatter plots, we can observe that there is a positive relationship between marketing expenditure and the amount of purchases. As marketing expenditure increases, we see an increase in purchase amount, suggesting that higher marketing spend may lead to more customer engagement and sales. However, there is no clear relationship between marketing expenditure and the number of visits. This indicates that while marketing efforts may drive purchases, they do not necessarily increase the frequency of customer visits. 
