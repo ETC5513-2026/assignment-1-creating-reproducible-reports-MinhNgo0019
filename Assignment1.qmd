@@ -8,32 +8,24 @@ format:
         toc: true
 ---
 
-# Load libraries (not display any R code, messages, or warnings)
 ```{r setup, include=FALSE}
-#| echo = FALSE
-#| message = FALSE
-#| warning = FALSE
+#| echo: FALSE
+#| message: FALSE
+#| warning: FALSE
 library(tidyverse)
 library(ggplot2)
+library(gridExtra)
 ```
 
 # Load the data
 ```{r load-data}
-#| echo = FALSE
-#| message = FALSE
-#| warning = FALSE
+#| message: FALSE
+#| warning: FALSE
 data <- read_csv("data/34667830_Minh Ngo.csv")
 ```
 
-# Data exploration
-```{r data-exploration}
-data |> head()
-data |> glimpse()
-data |> summary()
-```
-
 # Introduction section
-In this assignment, we will analyze the dataset containing information about the relationship between marketing expenditure and the number of visits, amount purchases of customers. The dataset includes variables such as `signup_date`, `marketing_spend`, `visits`, and `amount_purchases`. We will explore the data to understand the distribution of these variables and their relationships.
+In the modern business landscape, understanding the impact of marketing expenditure on customer behavior is crucial for optimizing marketing strategies and maximizing return on investment. In this assignment, we will analyze the dataset containing information about the relationship between marketing expenditure and the number of visits, amount of purchases of customers. The dataset includes variables such as `signup_date`, `marketing_spend`, `visits`, and `purchase_amount`. We will explore the data to understand the distribution of these variables and their relationships.
 
 # Research Question section
 The main research questions we aim to answer are:
@@ -43,23 +35,34 @@ The main research questions we aim to answer are:
 
 # Dataset introduction
 Dataset was collected from 150 observations, including the following variables:
+
 - `customer_id`: Unique identifier for each customer
+
 - `signup_date`: The date when the customer signed up
+
 - `marketing_spend`: The amount of money spent on marketing for each customer
+
 - `visits`: The number of visits made by each customer
-- `amount_purchases`: The total amount of purchases made by each customer
+
+- `purchase_amount`: The total amount of purchases made by each customer
+
 - `segment`: The customer segment (e.g. "Consumer", "SMB") to which each customer belongs
+
 - `notes`: Additional notes about each customer (e.g. "contacted", "returned")
 
 # Dataset Description subsection
 Number of rows and columns
 ```{r dataset-description}
+#| echo: FALSE
 size <- nrow(data)
 column <- ncol(data)
 dataset_description <- data.frame(
   size = size,
   columns = column
 )
+```
+
+```{r number-rows-columns}
 dataset_description
 ```
 
@@ -81,30 +84,66 @@ summary_table
 
 Based on the summary statistics, dataset has some missing values. Ignoring them, we have the average marketing expenditure is around $142.61, with a wide range of values from $1.97 to $298.31. The average number of visits is approximately 5, while the average amount of purchases is around $120.
 
+```{r remove NA}
+data_clean <- data |> drop_na()
+```
+
 ```{r summary-plots}
-summary_plots <- data |> select(marketing_spend) |> na.omit() |> hist(marketing_spend, main = "Distribution of Marketing Spend", xlab = "Marketing Spend")
+mar_pur_plot <- data_clean |> select(marketing_spend, purchase_amount) |> 
+  pivot_longer(cols = c(marketing_spend, purchase_amount), 
+               names_to = "variable", 
+               values_to = "value") |> 
+  ggplot(aes(x = variable, y = value)) +
+  geom_boxplot() +
+  labs(title = "Summary Plots for Marketing Spend, and Purchase Amount",
+       x = "Variable",
+       y = "Value")
+
+visit_plot <- data_clean |> select(visits) |>  
+  ggplot(aes(x = "visits", y = visits)) +
+  geom_boxplot() +
+  labs(title = "Summary Plots for Visits",
+       x = "Variable",
+       y = "Value")
+
+grid.arrange(mar_pur_plot, visit_plot, nrow = 1)
 ```
 
 # Results section
 
-```{r summary-plots}
+```{r relationship-plots}
 # Summary plot
-mar_pur_plot <- data |>
+mar_pur_plot <- data_clean |>
   ggplot(aes(x = marketing_spend, y = purchase_amount)) +
   geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
   labs(title = "Marketing Spend vs Amount Purchases",
        x = "Marketing Spend",
        y = "Amount Purchases") 
 
-mar_vis_plot <- data |>
+mar_vis_plot <- data_clean |>
   ggplot(aes(x = marketing_spend, y = visits)) +
   geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
   labs(title = "Marketing Spend vs Visits",
        x = "Marketing Spend",
        y = "Visits") 
 
+pur_vis_plot <- data_clean |>
+  ggplot(aes(x = visits, y = purchase_amount)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = "Visits vs Amount Purchases",
+       x = "Visits",
+       y = "Amount Purchases")
+
 mar_pur_plot
 mar_vis_plot
+pur_vis_plot
 ```
 
-From the scatter plots, we can observe that there is a positive relationship between marketing expenditure and the amount of purchases. As marketing expenditure increases, we see an increase in purchase amount, suggesting that higher marketing spend may lead to more customer engagement and sales. However, there is no clear relationship between marketing expenditure and the number of visits. This indicates that while marketing efforts may drive purchases, they do not necessarily increase the frequency of customer visits. 
+From the scatter plots, we can observe that there is a positive relationship between marketing expenditure and the amount of purchases. As marketing expenditure increases, we see an increase in purchase amount, suggesting that higher marketing spend may lead to more customer engagement and sales. However, there is just a weak relationship between marketing expenditure and the number of visits. This indicates that while marketing efforts may drive purchases, they do not strongly increase the frequency of customer visits. And finally, there is a positive relationship between the number of visits and the amount of purchases. It is clear that customers who visit more frequently tend to spend more, which suggests that encouraging repeat visits could be a key strategy for increasing sales.
+
+# Conclusion section
+In conclusion, our analysis of the dataset reveals that marketing expenditure has a significant positive impact on the amount of purchases, while its effect on the number of visits is relatively weak. Additionally, there is a strong positive relationship between the number of visits and the amount of purchases, indicating that customers who visit more frequently tend to spend more. These findings suggest that while investing in marketing can boost sales, strategies that encourage repeat visits may be more effective in driving long-term customer engagement and increasing purchase amounts.
+
