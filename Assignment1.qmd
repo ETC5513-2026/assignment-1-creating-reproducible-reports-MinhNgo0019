@@ -89,6 +89,8 @@ data_clean <- data |> drop_na()
 ```
 
 ```{r summary-plots}
+#| warning: false
+#| message: false
 mar_pur_plot <- data_clean |> select(marketing_spend, purchase_amount) |> 
   pivot_longer(cols = c(marketing_spend, purchase_amount), 
                names_to = "variable", 
@@ -112,6 +114,8 @@ grid.arrange(mar_pur_plot, visit_plot, nrow = 1)
 # Results section
 
 ```{r relationship-plots}
+#| warning: false
+#| message: false
 # Summary plot
 mar_pur_plot <- data_clean |>
   ggplot(aes(x = marketing_spend, y = purchase_amount)) +
